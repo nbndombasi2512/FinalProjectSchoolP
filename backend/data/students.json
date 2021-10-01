@@ -1,0 +1,76 @@
+[
+    {
+        "firstName":"Wynnie",
+        "lastName":"Kinder",
+        "gender":"Female",
+        "date":"8/23/2021",
+        "address": "8399 Boul Chateauneuf",
+        "user": "Student",
+        "DOB": "25/12/1992",
+        "telephone":"+1 (231) 151-7674",        
+        "city":"Anaco",
+        "province":"quebec",
+        "country":"Venezuela",
+        "zip code":"H1K 1E6",
+        "email":"wkinder0@cam.ac.uk",
+        "password":"1234567",
+        "passwordConfirm":"1234567"
+    },
+    {
+        "studentId":20211412,
+        "first_name":"Cathrin",
+        "last_name":"Luckings","gender":"Male","date":"10/27/2020","email":"cluckings1@squarespace.com","telephone":"459-881-2704","address":"1410 Hoepker Lane","city":"Independencia","country":"Mexico","zip code":"60070","image":null
+    },
+    {
+        "studentId":20217607,"first_name":"Barthel","last_name":"Kenney","gender":"Female","date":"8/27/2021","email":"bkenney2@sun.com","telephone":"786-666-3038","address":"256 Algoma Hill","city":"Silihe","country":"China","zip code":"6448","image":null
+    },
+    {
+        "studentId":20211005,
+        "first_name":"Aridatha",
+        "last_name":"Farryann",
+        "gender":"Female",
+        "date":"6/20/2021",
+        "email":"afarryann3@dropbox.com",
+        "telephone":"917-483-7334",
+        "address":"9 Maple Wood Place",
+        "city":"Kedrovoye",
+        "country":"Russia",
+        "zip code":"6288",
+        "image":null
+    },
+    {
+        "studentId":20212940,"first_name":"Fallon","last_name":"Wondraschek","gender":"Female","date":"6/26/2021","email":"fwondraschek4@wix.com","telephone":"972-985-0232","address":"28 Nevada Place","city":"Cravinhos","country":"Brazil","zip code":"1414","image":null
+    },
+    {
+        "studentId":20211447,"first_name":"Delphinia","last_name":"Toms","gender":"Female","date":"8/11/2021","email":"dtoms5@myspace.com","telephone":"929-620-0413","address":"05611 Forest Terrace","city":"Iradan","country":"Kyrgyzstan","zip code":"3272","image":null
+    },
+    {
+        "studentId":20217480,"first_name":"Hasty","last_name":"Breming","gender":"Genderfluid","date":"1/22/2021","email":"hbreming6@elegantthemes.com","telephone":"284-875-9506","address":"3 Bobwhite Court","city":"Sultan Kudarat","country":"Philippines","zip code":"4436","image":null
+    },
+    {
+        "studentId":20212236,"first_name":"Durant","last_name":"Limer","gender":"Genderqueer","date":"12/23/2020","email":"dlimer7@ftc.gov","telephone":"564-703-5141","address":"5877 Shoshone Trail","city":"Ruoqiang","country":"China","zip code":"5035","image":null
+    },
+    {
+        "studentId":20216519,"first_name":"Tallie","last_name":"Piddletown","gender":"Non-binary","date":"10/24/2020","email":"tpiddletown8@phpbb.com","telephone":"312-522-0491","address":"5 Bluejay Park","city":"Psachná","country":"Greece","zip code":"5474","image":null
+    },
+    {"studentId":20215459,"first_name":"Rubi","last_name":"Jahnig","gender":"Bigender","date":"2/10/2021","email":"rjahnig9@yellowpages.com","telephone":"783-479-4592","address":"3 Grover Lane","city":"Donja Mahala","country":"Bosnia and Herzegovina","zip code":"8441","image":null},
+    {"studentId":20214449,"first_name":"Idalina","last_name":"Sumnall","gender":"Bigender","date":"5/21/2021","email":"isumnalla@macromedia.com","telephone":"656-251-5298","address":"58255 Miller Place","city":"Degeberga","country":"Sweden","zip code":"2972","image":null},
+    {"studentId":20211937,"first_name":"Adelheid","last_name":"Campey","gender":"Bigender","date":"3/22/2021","email":"acampeyb@usda.gov","telephone":"164-795-9498","address":"4372 Eastlawn Way","city":"Falun","country":"Sweden","zip code":"7915","image":null},
+    {"studentId":20215714,"first_name":"Shaylyn","last_name":"Chatain","gender":"Non-binary","date":"10/8/2020","email":"schatainc@chicagotribune.com","telephone":"856-816-7535","address":"76683 Oxford Lane","city":"Paucarbamba","country":"Peru","zip code":"9771","image":null},
+    {"studentId":20212586,"first_name":"Charita","last_name":"Diggle","gender":"Polygender","date":"5/3/2021","email":"cdiggled@sciencedirect.com","telephone":"202-735-9951","address":"89 Sycamore Road","city":"Norak","country":"Tajikistan","zip code":"7057","image":null},
+    {"studentId":20216321,"first_name":"Trina","last_name":"Grave","gender":"Female","date":"12/17/2020","email":"tgravee@arstechnica.com","telephone":"407-283-4595","address":"8 Heath Drive","city":"Fenghuo","country":"China","zip code":"2639","image":null},
+    {"studentId":20216575,"first_name":"Genny","last_name":"Paliser","gender":"Genderqueer","date":"9/3/2021","email":"gpaliserf@whitehouse.gov","telephone":"641-347-3973","address":"66 Victoria Center","city":"Asbest","country":"Russia","zip code":"624269","image":null},
+    {"studentId":20212597,"first_name":"Leontyne","last_name":"Rentelll","gender":"Polygender","date":"11/3/2020","email":"lrentelllg@google.ca","telephone":"136-867-2347","address":"7 Meadow Vale Avenue","city":"Wielichowo","country":"Poland","zip code":"64050","image":null},
+    {"studentId":20214603,"first_name":"Brannon","last_name":"Moorerud","gender":"Female","date":"9/6/2021","email":"bmoorerudh@phpbb.com","telephone":"267-920-7278","address":"07 Artisan Place","city":"Carianos","country":"Brazil","zip code":"37460","image":null},
+    {"studentId":20212890,"first_name":"Dannel","last_name":"Brinsden","gender":"Agender","date":"12/1/2020","email":"dbrinsdeni@whitehouse.gov","telephone":"992-400-7210","address":"42 Longview Place","city":"El Llano","country":"Honduras","zip code":"9011","image":null},
+    {"studentId":20215665,"first_name":"Cherie","last_name":"Colmer","gender":"Bigender","date":"6/21/2021","email":"ccolmerj@usnews.com","telephone":"398-120-8949","address":"6208 Bluestem Street","city":"Jīwani","country":"Pakistan","zip code":"28360","image":null},
+    {"studentId":20214635,"first_name":"Bearnard","last_name":"Gail","gender":"Polygender","date":"10/7/2020","email":"bgailk@meetup.com","telephone":"580-723-7602","address":"354 Manufacturers Road","city":"Calasgasan","country":"Philippines","zip code":"4508","image":null},
+    {"studentId":20213726,"first_name":"Keely","last_name":"McFadden","gender":"Female","date":"6/22/2021","email":"kmcfaddenl@google.co.jp","telephone":"242-603-1051","address":"5 Golf Way","city":"Wuling","country":"China","zip code":"4489","image":null},
+    {"studentId":20216048,"first_name":"Daryn","last_name":"Harkness","gender":"Polygender","date":"1/20/2021","email":"dharknessm@prweb.com","telephone":"484-337-9848","address":"08 Oakridge Way","city":"San Diego","country":"Colombia","zip code":"202038","image":null},
+    {"studentId":20211265,"first_name":"Danyette","last_name":"Pitherick","gender":"Non-binary","date":"10/4/2020","email":"dpitherickn@blogger.com","telephone":"425-143-0285","address":"78570 Sheridan Point","city":"Brazzaville","country":"Republic of the Congo","zip code":"7935","image":null},
+    {"studentId":20213327,"first_name":"Ivar","last_name":"Dibden","gender":"Agender","date":"5/2/2021","email":"idibdeno@mapy.cz","telephone":"542-266-6625","address":"5900 Rieder Circle","city":"Brunflo","country":"Sweden","zip code":"834 33","image":null},
+    {"studentId":20214836,"first_name":"Waring","last_name":"Barnwill","gender":"Non-binary","date":"9/27/2020","email":"wbarnwillp@imdb.com","telephone":"131-881-2682","address":"403 Hoffman Trail","city":"Al Qardāḩah","country":"Syria","zip code":"6417","image":null},
+    {"studentId":20215030,"first_name":"Shellysheldon","last_name":"Endon","gender":"Male","date":"8/5/2021","email":"sendonq@ucla.edu","telephone":"521-618-4097","address":"961 Stoughton Pass","city":"Nanbin","country":"China","zip code":"8997","image":null},
+    {"studentId":20218861,"first_name":"Curr","last_name":"Matveiko","gender":"Genderfluid","date":"6/26/2021","email":"cmatveikor@quantcast.com","telephone":"415-821-2307","address":"9443 Mcbride Avenue","city":"Maoping","country":"China","zip code":null,"image":null},
+    {"studentId":20213356,"first_name":"Deidre","last_name":"Pugh","gender":"Agender","date":"8/9/2021","email":"dpughs@digg.com","telephone":"319-580-0068","address":"5416 Pearson Crossing","city":"Krotoszyn","country":"Poland","zip code":"63702","image":null},
+    {"studentId":20212553,"first_name":"Griff","last_name":"Eastcott","gender":"Bigender","date":"3/16/2021","email":"geastcottt@omniture.com","telephone":"920-736-8432","address":"96 Farragut Way","city":"Tumauini","country":"Philippines","zip code":"3325","image":null}]

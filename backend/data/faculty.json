@@ -1,0 +1,69 @@
+[
+    {
+        "_id": "20211235",
+        "faculty": "Science",
+        "courses": [
+            {
+                "year":"firstYear",
+                "classes": ["Geology 101", "Chemistry 101", "Physics 101", "Statistics 101", "Microbiology 101", "Biochemistry 101"]
+            },
+            {
+                "year":"secondYear",
+                "classes": ["Geology 201", "Chemistry 201", "Physics 201", "Statistics 201", "Microbiology 201", "Biochemistry 201"]
+            }
+            ,
+            {
+                "year":"thirdYear",
+                "classes": ["Geology 301", "Chemistry 301", "Physics 301", "Statistics 301", "Microbiology 301", "Biochemistry 301"]
+            }
+        ],
+               
+        "message":"The Faculty of Science and Agriculture is a vibrant, innovative centre of scientific and technological excellence, with a mission to unlock the potential of our staff, students and communities through teaching, research, and strategic partnerships" 
+    },
+
+    {
+        "_id": "20211284",
+        "faculty": "Administration ",
+
+        "courses": [
+        {
+            "year":"firstYear",
+            "classes": ["Accounting 101", "Banking and finance 101", "Business management 101", "Marking 101", "Public administration 101"]
+        },
+        {
+            "year":"secondYear",
+            "classes": ["Accounting 201", "Banking and finance 201", "Business management 201", "Marking 201", "Public administration 201"]
+        }
+        ,
+        {
+            "year":"thirdYear",
+            "classes": ["Accounting 301", "Banking and finance 301", "Business management 301", "Marking 301", "Public administration 301"]
+        }
+    ],
+    
+        "message":"We pride ourselves for being part of the institution that has produced and continues to produce leaders in government and in the private sector. The faculty of Management and Commerce comprises seven departments, including our flagship Bachelor of Accounting"      
+    },
+
+    {
+        "_id": "20211254",
+        "faculty": "Education",
+
+        "courses": [
+        {
+            "year":"firstYear",
+            "classes": ["Adult education 101", "agricultural education 101", "Biology education 101", "Business education 101", "Chemistry education 101", "Environmental education 101", "Elementary education 101", "English education 101"]
+        },
+        {
+            "year":"secondYear",
+            "classes": ["Adult education 201", "agricultural education 201", "Biology education 201", "Business education 201", "Chemistry education 201", "Environmental education 201", "Elementary education 201", "English education 201"]
+        }
+        ,
+        {
+            "year":"thirdYear",
+            "classes": ["Adult education 301", "agricultural education 301", "Biology education 301", "Business education 301", "Chemistry education 301", "Environmental education 301", "Elementary education 301", "English education 301"]
+        }
+    ],     
+        
+        "message":"We are a dynamic and vibrant Faculty, with a diverse staff and student population.  We are located in two campuses, both offering a number of initial Teacher Education, as well as continuing professional development programmes"        
+    }
+]

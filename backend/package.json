@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "server": "nodemon index.js",
+    "client": "yarn run start --prefix ../frontend",
+    "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.13"
+  },
+  "dependencies": {
+    "@material-ui/core": "^5.0.0-beta.5",
+    "assert": "^2.0.0",
+    "body-parser": "^1.19.0",
+    "concurrently": "^6.2.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "file-system": "^2.2.2",
+    "moment": "^2.29.1",
+    "mongodb": "^4.1.2",
+    "mongouri": "^0.0.0",
+    "morgan": "^1.10.0",
+    "uuid": "^8.3.2"
+  }
+}
