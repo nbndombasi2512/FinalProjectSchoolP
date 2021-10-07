@@ -10,7 +10,7 @@ const Profile = () => {
   // console.log(signedInUser, "signed in user");
 
   const [registration, setRegistration] = useState(null);
-
+  const [allInOne, setAllInOne] = useState();
   const [getStudent, setGetStudent] = useState("");
   const [studentId, setStudentId] = useState("");
   const [studentClasses, setStudentClasses] = useState([]);
@@ -71,6 +71,14 @@ const Profile = () => {
         setGetStudentGrade(data.data);
       });
   };
+
+  useEffect(() => {
+    fetch("/api/grade").then((Response) =>
+      Response.json().then((data) => {
+        setAllInOne(data.data);
+      })
+    );
+  }, []);
 
   const handleRegisteredGrade = (e) => {
     e.preventDefault();
@@ -143,13 +151,25 @@ const Profile = () => {
                     {classes}
 
                     <div className="classes-section">
-                      {signedInUser.user === "teacher" && (
+                      {signedInUser.user === "teacher" ? (
                         <>
+                          <span className="full-name department">
+                            Department: {registration.department}
+                          </span>
                           <span className="full-name">
                             {registration.firstName} {registration.lastName}
                           </span>
                           <span className="full-name">
                             {registration.email}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="full-name department">
+                            Department: {registration.department}
+                          </span>
+                          <span className="full-name">
+                            {registration.firstName} {registration.lastName}
                           </span>
                         </>
                       )}
@@ -211,7 +231,6 @@ const Profile = () => {
                           </option>
                           {teacherStudents &&
                             teacherStudents.map((student) => {
-                              // console.log("student : ", student);
                               return (
                                 <option value={student._id}>
                                   {`${student.firstName} ${student.lastName}`}
@@ -269,10 +288,14 @@ const Profile = () => {
                       }
                     >
                       <h2>List of studends with grades</h2>
+                      <span className="grades-head">StudentID</span>
+                      <span className="grades-head">Full - name</span>
+                      <span className="grades-head">Department</span>
+                      <span className="grades-head">Course</span>
+                      <span className="grades-head">Grade</span>
+
                       {getStudentGrade &&
                         getStudentGrade?.map((studentGrade) => {
-                          console.log("studentGrade: ", studentGrade);
-                          // console.log("student grade: ", studentGrade);
                           return <DisplayGrades grade={studentGrade} />;
                         })}
                     </div>
@@ -283,17 +306,8 @@ const Profile = () => {
                       toggleState === 3 ? "content  active-content" : "content"
                     }
                   >
-                    <h2>Content 3</h2>
-                    <hr />
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                      Eos sed nostrum rerum laudantium totam unde adipisci
-                      incidunt modi alias! Accusamus in quia odit aspernatur
-                      provident et ad vel distinctio recusandae totam quidem
-                      repudiandae omnis veritatis nostrum laboriosam architecto
-                      optio rem, dignissimos voluptatum beatae aperiam
-                      voluptatem atque. Beatae rerum dolores sunt.
-                    </p>
+                    <h2>Each Course</h2>
+                    <div>{}</div>
                   </div>
                 </ContentTabs>
               </Container>
@@ -313,7 +327,7 @@ const Profile = () => {
                     className={toggleState === 2 ? "tabs active-tabs" : "tabs"}
                     onClick={() => toggleTab(2)}
                   >
-                    List of Students
+                    Student Grades
                   </button>
                 </BlocTabs>
 
@@ -326,14 +340,36 @@ const Profile = () => {
                           : "content"
                       }
                     >
-                      <h2>List of studends with grades</h2>
+                      <h2>Grades</h2>
+                      <span className="grades-head">StudentID</span>
+                      <span className="grades-head">Full - name</span>
+                      <span className="grades-head">Department</span>
+                      <span className="grades-head">Course</span>
+                      <span className="grades-head">Grade</span>
+
                       {getStudentGrade &&
                         getStudentGrade?.map((studentGrade) => {
-                          console.log("studentGrade: ", studentGrade);
                           return <DisplayGrades grade={studentGrade} />;
                         })}
                     </div>
                   </>
+                  <div
+                    className={
+                      toggleState === 3 ? "content  active-content" : "content"
+                    }
+                  >
+                    <h2>Each Course</h2>
+                    {/* <hr /> */}
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                      Eos sed nostrum rerum laudantium totam unde adipisci
+                      incidunt modi alias! Accusamus in quia odit aspernatur
+                      provident et ad vel distinctio recusandae totam quidem
+                      repudiandae omnis veritatis nostrum laboriosam architecto
+                      optio rem, dignissimos voluptatum beatae aperiam
+                      voluptatem atque. Beatae rerum dolores sunt.
+                    </p>
+                  </div>
                 </ContentTabs>
               </Container>
 
@@ -463,6 +499,12 @@ const Wrapper = styled.div`
     margin: auto;
   }
 
+  .grades-head {
+    margin-right: 65px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
   // Tabs styling starting here
 
   .tabs {
@@ -514,6 +556,8 @@ const Wrapper = styled.div`
     padding: 0px 0 5px 0px;
     font-size: 20px;
     font-weight: 300;
+    margin-bottom: 30px;
+    margin-right: 70px;
   }
   .content hr {
     width: 100px;
@@ -579,6 +623,12 @@ const Department = styled.div`
     font-size: 14px;
     /* margin-top: 85px; */
     color: #fff;
+  }
+
+  .department {
+    font-size: 16px;
+    margin-top: -40px;
+    margin-bottom: 15px;
   }
 `;
 

@@ -11,6 +11,7 @@ const {
   getStudentByEmail,
   addGrade,
   getAllStudentGrade,
+  getGradeByClasse,
 } = require("./HandlerFolder/Handlers");
 
 const PORT = 8000;
@@ -26,6 +27,7 @@ express()
   .get("/api/registration", getAllRegisteredStudent)
   .get("/api/registration/:email", getStudentByEmail)
   .post("/api/grade", addGrade)
+  .get("/api/grade", getGradeByClasse)
   .get("/api/teacher/grade/:id", getAllStudentGrade)
 
   .get("/api/faculty", getAllFaculties)

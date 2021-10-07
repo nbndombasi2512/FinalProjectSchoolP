@@ -56,7 +56,7 @@ const Validate = ({
 
   // INPUTS FOR CONTACT INFORMATION
   // Phone number must be less then 18 characters.
-  if (phoneNumber.length < 10) {
+  if (phoneNumber.length > 10) {
     validationStatus = "Invalid phone number";
   }
   // Email must include an "@" and a ".".

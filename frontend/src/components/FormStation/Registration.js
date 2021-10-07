@@ -6,25 +6,18 @@ import { SchoolContext } from "../SchoolContext";
 import CheckboxComponent from "../CheckboxComponent";
 
 const Confirmation = ({ firstname, lastname, selectedClasses }) => (
-  <div>
+  <div className="confirmation-style">
     {firstname} {lastname} your registration was successful
   </div>
 );
 
 const Rgistration = () => {
   const { faculties } = useContext(SchoolContext);
-
   const [selectedClasses, setSelectedClasses] = useState([]);
-
-  // const handleChange = (e) => {
-  //   const classes = [...selectedClasses, e.target.value];
-  //   setSelectedClasses(classes);
-  // };
 
   const [image, setImage] = useState("");
   const [registered, setRegistered] = useState(false);
 
-  // const [studentStaff, setStudentStaff] = useState("");
   const [courses, setCourses] = useState({});
   const [department, setDepartment] = useState("");
   const [year, setYear] = useState("");
@@ -72,8 +65,6 @@ const Rgistration = () => {
     }
   };
 
-  // idGenerateStudentStaff("thirdYear");
-
   const handleRegistrationInfo = (e) => {
     e.preventDefault();
 
@@ -112,23 +103,23 @@ const Rgistration = () => {
         },
         body: JSON.stringify({
           _id: idGenerateStudentStaff(year, user),
-          department,
+          department: department,
           // courses,
-          year,
-          firstName,
-          lastName,
-          selectedClasses,
-          gender,
-          email,
-          address,
-          user,
-          phoneNumber,
-          city,
-          location,
-          country,
-          zip,
-          image,
-          password,
+          year: year,
+          firstName: firstName,
+          lastName: lastName,
+          selectedClasses: selectedClasses,
+          gender: gender,
+          email: email,
+          address: address,
+          user: user,
+          phoneNumber: phoneNumber,
+          city: city,
+          location: location,
+          country: country,
+          zip: zip,
+          image: image,
+          password: password,
         }),
       })
         .then((response) => response.json())
@@ -151,10 +142,7 @@ const Rgistration = () => {
     <>
       <Wrapper>
         {!registered ? (
-          <Form
-            onSubmit={handleRegistrationInfo}
-            encType={"multipart /form-data"}
-          >
+          <Form onSubmit={handleRegistrationInfo}>
             <Section>
               <Subtitle>Register Information</Subtitle>
 
@@ -340,7 +328,7 @@ const Rgistration = () => {
                 />
               </SideBySide>
 
-              <SideBySide>
+              {/* <SideBySide>
                 <div className="form-data">
                   <label for="image"> Upload image </label>
                   <input
@@ -354,7 +342,7 @@ const Rgistration = () => {
                     }}
                   />
                 </div>
-              </SideBySide>
+              </SideBySide> */}
 
               <Subtitle className="section-signup">SignUp Information</Subtitle>
               <SideBySide>
@@ -410,6 +398,13 @@ const Wrapper = styled.div`
   background-size: cover;
   background-position: center;
   height: 120vh;
+
+  .confirmation-style {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 25px;
+  }
 
   .select-role {
     flex: 1;
@@ -530,34 +525,5 @@ const EachDepartment = styled.div`
     list-style: none;
   }
 `;
-// [class1, class2, class3]
-// {
-//   name:"abc",
-//   user:student,
-//   classes:[class1, class2, class3]
-// }
 
-// {
-//   name:"abc",
-//   user:teacher,
-//   classes:[class1, class2, class3]
-// }
-// [
-
-//   ({
-//     name: "abc",
-//     teacher: 1,
-//     class: class1,
-//   },
-//   {
-//     name: "abc",
-//     techer: 1,
-//     class: class2,
-//   },
-//   {
-//     name: "abc",
-//     teacher: 1,
-//     class: class3,
-//   })
-// ];
 export default Rgistration;

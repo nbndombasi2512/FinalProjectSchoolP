@@ -1,6 +1,6 @@
 "use strict";
-// const { cloudinary } = require("./utils/cloudinary");
-const bcrypt = require("bcrypt");
+
+const morgan = require("morgan");
 const { MongoClient } = require("mongodb");
 require("dotenv").config();
 const { MONGO_URI } = process.env;
@@ -169,6 +169,20 @@ const addGrade = async (req, res) => {
   }
 };
 
+const addImageForTeachers = async (req, res) => {
+  try {
+    const fileStr = req.body.data;
+    const uploadResponse = await cloudinary.uploader.upload(fileStr, {
+      upload_preset: "dev_setups",
+    });
+    console.log(uploadResponse);
+    res.json({ msg: "yaya" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ err: "Something went wrong" });
+  }
+};
+
 const getAllFaculties = async (req, res) => {
   try {
     // create new client
@@ -192,19 +206,28 @@ const getAllFaculties = async (req, res) => {
   }
 };
 
-// const uploadImage = async (req, res) => {
-//   try {
-//     const fileStr = req.body.data;
-//     const uploadResponse = await cloudinary.uploader.upload(fileStr, {
-//       upload_preset: "dev_setups",
-//     });
-//     console.log(uploadResponse);
-//     res.json({ msg: "yaya" });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ err: "Something went wrong" });
-//   }
-// };
+const getGradeByClasse = async (req, res) => {
+  try {
+    // create new client
+    const client = new MongoClient(MONGO_URI, options);
+
+    // connect to the client
+    await client.connect();
+    // connect to the database
+    const db = client.db("SchoolPortal");
+    // create the items collection
+    const result = await db.collection("grades").find().toArray();
+    // console.log("connected!", result);
+
+    if (result.length > 0) {
+      return res.status(200).json({ status: 200, data: result });
+    } else {
+      return res.status(404).json({ status: 404, data: error });
+    }
+  } catch (error) {
+    console.log(error.stack);
+  }
+};
 
 module.exports = {
   addRegistration,
@@ -215,5 +238,5 @@ module.exports = {
   getStudentByEmail,
   addGrade,
   getAllStudentGrade,
-  // uploadImage,
+  getGradeByClasse,
 };

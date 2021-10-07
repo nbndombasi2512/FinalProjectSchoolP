@@ -45,8 +45,7 @@ const SignIn = () => {
           setSignedInUser(data.data);
           history.push("/profile");
         } else {
-          setWrongSubmission(null);
-          alert("Password or ur email doesn't match");
+          setWrongSubmission("Password or ur email doesn't match");
         }
       });
   };
