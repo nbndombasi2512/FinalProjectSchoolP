@@ -1,20 +1,18 @@
 import React from "react";
-import { BrowserRouter, Switch, Route } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 import GlobalStyles from "./GlobalStyles";
 import styled from "styled-components";
 import Home from "./components/Home";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
-import Profile from "./components/Profile";
+import Profile from "./components/profileStation/Profile";
 import SignIn from "./components/FormStation/SignIn";
 import Registration from "./components/FormStation/Registration";
 import Sidebar from "./components/Sidebar";
-import Confirmation from "./components/FormStation/Confirmation";
-
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <>
       <GlobalStyles />
       <Header />
       <Main>
@@ -30,10 +28,7 @@ const App = () => {
             <Registration />
           </Route>
 
-          <Route path="/confirmation">
-            <Confirmation />
-          </Route>
-
+          {/* Wrapper for the profile component only */}
           <Wrapper>
             <Sidebar />
             <Switch>
@@ -45,7 +40,7 @@ const App = () => {
         </Switch>
       </Main>
       <Footer />
-    </BrowserRouter>
+    </>
   );
 };
 

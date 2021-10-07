@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { FiBookmark, FiHome, FiBell, FiTwitter, FiUser } from "react-icons/fi";
+import { FiBookmark, FiHome, FiBell, FiUser } from "react-icons/fi";
 
 const Sidebar = () => {
   return (
@@ -18,7 +18,7 @@ const Sidebar = () => {
 
           <NavLink className="nav-item" exact to="/Notifications">
             <FiBell className="icon" />
-            Science
+            Notifications
           </NavLink>
 
           <NavLink className="nav-item" exact to="/Bookmarks">
@@ -41,12 +41,6 @@ const SidebarStyle = styled.div`
     display: flex;
     text-decoration: none;
     margin: 50px;
-  }
-
-  .nav-item:hover {
-    background-color: #dbccff;
-    width: max-content;
-    border-radius: 50px;
   }
 
   .icon {

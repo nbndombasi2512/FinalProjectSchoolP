@@ -22,9 +22,9 @@ const batchImport = async () => {
     const db = client.db("SchoolPortal");
 
     // create the items collection
-    await db.collection("faculty").insertMany(itemsArray);
-    console.log("connected!");
-    // await db.collection("faculty").deleteMany();
+    // await db.collection("faculty").insertMany(itemsArray);
+    // console.log("connected!");
+    // await db.collection("registrations").deleteMany();
     // console.log("connected!");
     // create the companies collection
     // await db.collection("companies").insertMany(companiesArray);

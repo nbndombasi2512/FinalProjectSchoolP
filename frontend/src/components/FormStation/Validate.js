@@ -1,5 +1,3 @@
-import React from "react";
-
 const Validate = ({
   firstName,
   lastName,
@@ -7,14 +5,14 @@ const Validate = ({
   email,
   address,
   user,
-  birthday,
+  studentStaff,
   phoneNumber,
+  courses,
   city,
   location,
   country,
   zip,
   password,
-  passwordConfirm,
 }) => {
   let validationStatus = "good";
   if (firstName.length < 2) {
@@ -27,6 +25,10 @@ const Validate = ({
 
   if (gender === "") {
     validationStatus = "Please Select gender ";
+  }
+
+  if (studentStaff === "") {
+    validationStatus = "Please Select year ";
   }
 
   if (user === "") {
@@ -59,6 +61,7 @@ const Validate = ({
   }
   // Email must include an "@" and a ".".
   if (!email) {
+    validationStatus = "Please enter your email";
   }
 
   if (!email.includes("@") || !email.includes(".")) {
@@ -69,12 +72,6 @@ const Validate = ({
     validationStatus = "Password is required";
   } else if (password.length < 6) {
     validationStatus = "Password needs to be 6 characters or more";
-  }
-
-  if (!passwordConfirm) {
-    validationStatus = "Password is required";
-  } else if (passwordConfirm !== password) {
-    validationStatus = "Passwords do not match";
   }
 
   return validationStatus;

@@ -1,27 +1,36 @@
-import React from "react";
+import React, { useContext } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-// import { FaGraduationCap } from "react-icons/fa";
+import { SchoolContext } from "./SchoolContext";
 
 const Header = () => {
+  const { email, userSignedOutAction } = useContext(SchoolContext);
   return (
     <>
       <Wrapper>
         <Link to="/" style={{ textDecoration: "none" }}>
-          <Logo>
-            {/* <FaGraduationCap /> */}
-            schoolPORTAL
-          </Logo>
+          <Logo>schoolPORTAL</Logo>
         </Link>
 
         <SigninStyle>
-          <Link
-            to="/SignIn"
-            style={{ textDecoration: "none", color: "#fff", margin: "20px" }}
+          {email ? (
+            ` ${email} `
+          ) : (
+            <Link
+              to="/SignIn"
+              style={{ textDecoration: "none", color: "#fff", margin: "20px" }}
+            >
+              <span>Sign In</span>
+            </Link>
+          )}
+
+          <Button
+            onClick={() => {
+              userSignedOutAction();
+            }}
           >
-            <span>Sign In</span>
-          </Link>
-          <Button>SignOut</Button>
+            SignOut
+          </Button>
         </SigninStyle>
       </Wrapper>
     </>

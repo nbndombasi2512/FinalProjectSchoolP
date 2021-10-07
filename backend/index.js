@@ -7,6 +7,10 @@ const {
   addRegistration,
   getAllFaculties,
   handleLogin,
+  getAllRegisteredStudent,
+  getStudentByEmail,
+  addGrade,
+  getAllStudentGrade,
 } = require("./HandlerFolder/Handlers");
 
 const PORT = 8000;
@@ -19,8 +23,13 @@ express()
   .use("/", express.static(__dirname + "/"))
 
   .post("/api/registration", addRegistration)
+  .get("/api/registration", getAllRegisteredStudent)
+  .get("/api/registration/:email", getStudentByEmail)
+  .post("/api/grade", addGrade)
+  .get("/api/teacher/grade/:id", getAllStudentGrade)
+
   .get("/api/faculty", getAllFaculties)
-  .get("/api/signin", handleLogin)
+  .post("/api/signin", handleLogin)
 
   // handle 404s
   .use((req, res) => res.status(404).type("txt").send("🤷‍♂️"))

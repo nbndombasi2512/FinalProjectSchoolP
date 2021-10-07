@@ -1,0 +1,27 @@
+[
+    {
+        "faculty": "Education",
+        "class_id": "101",
+        "teacher_id": "2015",
+        "students": [{
+            "student_id": "2021",
+            "firstName": "p",
+            "lastName": "nk",
+            "grade": "78"
+        }]
+        
+    },
+    {
+       
+        "classNumber": "201",
+        "teacher_id": "2015",
+        "students": [{
+            "student_id": "2020",
+            "firstName": "lu",
+            "lastName": "russel",
+            "grade": "98"
+        }]
+        
+    }
+
+]

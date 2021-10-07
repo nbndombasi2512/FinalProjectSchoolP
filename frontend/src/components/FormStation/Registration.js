@@ -1,18 +1,38 @@
-import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import Validate from "./Validate";
+import { SchoolContext } from "../SchoolContext";
+import CheckboxComponent from "../CheckboxComponent";
+
+const Confirmation = ({ firstname, lastname, selectedClasses }) => (
+  <div>
+    {firstname} {lastname} your registration was successful
+  </div>
+);
 
 const Rgistration = () => {
-  let history = useHistory();
+  const { faculties } = useContext(SchoolContext);
 
+  const [selectedClasses, setSelectedClasses] = useState([]);
+
+  // const handleChange = (e) => {
+  //   const classes = [...selectedClasses, e.target.value];
+  //   setSelectedClasses(classes);
+  // };
+
+  const [image, setImage] = useState("");
+  const [registered, setRegistered] = useState(false);
+
+  // const [studentStaff, setStudentStaff] = useState("");
+  const [courses, setCourses] = useState({});
+  const [department, setDepartment] = useState("");
+  const [year, setYear] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [gender, setGender] = useState("");
   const [address, setAddress] = useState("");
   const [user, setUser] = useState("");
-  const [birthday, setBirthday] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [city, setCity] = useState("");
   const [location, setLocation] = useState(""); // used for provience/state or territory.
@@ -20,29 +40,60 @@ const Rgistration = () => {
   const [zip, setZip] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
+
+  useEffect(() => {
+    if (department && year) {
+      const faculty = faculties?.filter((fact) => {
+        return fact.faculty === department;
+      });
+
+      const courses = faculty[0].courses.filter(
+        (course) => course.year === year
+      );
+      setCourses(courses[0]);
+    }
+  }, [department, year, faculties]);
 
   // This state is for handling error input submission
   const [wrongSubmission, setWrongSubmission] = useState(null);
+
+  const idGenerateStudentStaff = (year, user) => {
+    let val = Math.floor(1000 + Math.random() * 9000);
+    if (user === "teacher") {
+      return "2015" + val;
+    }
+
+    if (year === "firstYear") {
+      return "2021" + val;
+    } else if (year === "secondYear") {
+      return "2020" + val;
+    } else if (year === "thirdYear") {
+      return "2019" + val;
+    }
+  };
+
+  // idGenerateStudentStaff("thirdYear");
 
   const handleRegistrationInfo = (e) => {
     e.preventDefault();
 
     const validationStatus = Validate({
+      department,
+      courses,
+      year,
       firstName,
       lastName,
       gender,
       email,
       address,
       user,
-      birthday,
       phoneNumber,
       city,
       location,
       country,
       zip,
+      image,
       password,
-      passwordConfirm,
     });
 
     if (validationStatus !== "good") {
@@ -60,27 +111,30 @@ const Rgistration = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          _id: idGenerateStudentStaff(year, user),
+          department,
+          // courses,
+          year,
           firstName,
           lastName,
+          selectedClasses,
           gender,
           email,
           address,
           user,
-          birthday,
           phoneNumber,
           city,
           location,
           country,
           zip,
+          image,
           password,
-          passwordConfirm,
         }),
       })
         .then((response) => response.json())
         .then((data) => {
           if (data.status === 200) {
-            history.push("/confirmation");
-            window.location.reload();
+            setRegistered(!registered);
           }
           if (data.status === 400) {
             console.log("ERROR:", data.error);
@@ -96,188 +150,255 @@ const Rgistration = () => {
   return (
     <>
       <Wrapper>
-        <Form onSubmit={handleRegistrationInfo}>
-          <Section>
-            <Subtitle>Register Information</Subtitle>
+        {!registered ? (
+          <Form
+            onSubmit={handleRegistrationInfo}
+            encType={"multipart /form-data"}
+          >
+            <Section>
+              <Subtitle>Register Information</Subtitle>
 
-            <SideBySide>
-              <Input
-                type="text"
-                name="firstname"
-                placeholder="Enter your Firstname"
-                value={firstName}
-                onChange={(e) => {
-                  setFirstName(e.target.value);
-                }}
-              />
-              <Input
-                type="text"
-                name="lastname"
-                placeholder="Enter your Lastname"
-                value={lastName}
-                onChange={(e) => {
-                  setLastName(e.target.value);
-                }}
-              />
-            </SideBySide>
+              <SideBySide>
+                <select
+                  className="select-role"
+                  name="role"
+                  id="role"
+                  onChange={(e) => {
+                    setDepartment(e.target.value);
+                  }}
+                >
+                  <option value="" hidden>
+                    department
+                  </option>
+                  <option value="Science">Science</option>
+                  <option value="Administration">Administration</option>
+                  <option value="Education">Education</option>
+                </select>
 
-            <SideBySide>
-              <select
-                className="select-role"
-                name="role"
-                id="role"
-                onChange={(e) => {
-                  setGender(e.target.value);
-                }}
-              >
-                <option value="">Gender</option>
-                <option value="female">Female</option>
-                <option value="male">Male</option>
-              </select>
-            </SideBySide>
+                <select
+                  className="select-role"
+                  name="role"
+                  id="role"
+                  onChange={(e) => {
+                    setYear(e.target.value);
+                  }}
+                >
+                  <option value="" hidden>
+                    Select your year
+                  </option>
+                  <option value="firstYear">firstYear</option>
+                  <option value="secondYear">secondYear</option>
+                  <option value="thirdYear">thirdYear</option>
+                </select>
+              </SideBySide>
 
-            <SideBySide>
-              <Input
-                type="address"
-                name="address"
-                placeholder="Enter your address"
-                value={address}
-                onChange={(e) => {
-                  setAddress(e.target.value);
-                }}
-              />
-            </SideBySide>
+              <SideBySide style={{ flexDirection: "column" }}>
+                {courses?.classes?.map((course) => {
+                  return (
+                    <EachDepartment>
+                      <li className="single-year">
+                        <CheckboxComponent
+                          name={course}
+                          checked={selectedClasses.some((e) => course === e)}
+                          handleOnChange={(ev) => {
+                            const selectedCourse = ev.target.value;
 
-            <SideBySide>
-              <select
-                className="select-role"
-                name="role"
-                id="role"
-                onChange={(e) => {
-                  setUser(e.target.value);
-                }}
-              >
-                <option value="">Choose a role</option>
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-              </select>
-            </SideBySide>
+                            // NOTE: `!ev.target.checked` is the condition when the user clicked an unchecked checkbox
+                            if (!ev.target.checked) {
+                              setSelectedClasses((curr) =>
+                                curr.filter((e) => e !== selectedCourse)
+                              );
+                              return;
+                            }
 
-            <SideBySide>
-              <Input
-                type="date"
-                id="DOB"
-                name="DOB"
-                placeholder="Date of Birth"
-                onChange={(e) => {
-                  setBirthday(e.target.value);
-                }}
-              />
-            </SideBySide>
+                            if (selectedClasses.length >= 4) {
+                              window.alert("Out of limit number classes");
+                              return;
+                            }
 
-            <SideBySide>
-              <Input
-                required
-                type="text"
-                name="phone"
-                placeholder="+1 (450) 555-5555"
-                value={phoneNumber}
-                maxLength="17"
-                onChange={(e) => {
-                  setPhoneNumber(e.target.value);
-                }}
-              />
-            </SideBySide>
+                            const newClasses = Array.from(
+                              new Set([...selectedClasses, selectedCourse])
+                            );
 
-            <SideBySide>
-              <Input
-                type="text"
-                name="city"
-                placeholder="Enter your City"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-              <Input
-                type="text"
-                name="province"
-                placeholder="Enter your province"
-                onChange={(e) => {
-                  setLocation(e.target.value);
-                }}
-              />
-            </SideBySide>
-            <SideBySide>
-              <Input
-                type="text"
-                name="country"
-                placeholder="Enter your Country"
-                onChange={(e) => {
-                  setCountry(e.target.value);
-                }}
-              />
-              <Input
-                required
-                type="text"
-                name="zip code"
-                placeholder="Enter your Zip/Postal code"
-                maxLength="7"
-                onChange={(e) => {
-                  setZip(e.target.value);
-                }}
-              />
-            </SideBySide>
-          </Section>
+                            setSelectedClasses(newClasses);
+                          }}
+                        />
+                      </li>
+                    </EachDepartment>
+                  );
+                })}
+              </SideBySide>
 
-          <Section>
-            <Subtitle>SignUp Information</Subtitle>
-            <SideBySide>
-              <Input
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
-              />
-            </SideBySide>
+              <SideBySide>
+                <Input
+                  type="text"
+                  name="firstname"
+                  placeholder="Enter your Firstname"
+                  value={firstName}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                  }}
+                />
 
-            <SideBySide>
-              <Input
-                type="password"
-                name="password"
-                placeholder="Enter your Password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                }}
-              />
-              <Input
-                type="password"
-                name="password2"
-                placeholder="Confirm your Password"
-                value={passwordConfirm}
-                onChange={(e) => {
-                  setPasswordConfirm(e.target.value);
-                }}
-              />
-            </SideBySide>
-          </Section>
-          <Button type="submit">Sign up</Button>
+                <Input
+                  type="text"
+                  name="lastname"
+                  placeholder="Enter your Lastname"
+                  value={lastName}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                  }}
+                />
+              </SideBySide>
 
-          {wrongSubmission && (
-            <WrongRequest>
-              <div>{wrongSubmission}</div>
-            </WrongRequest>
-          )}
+              <SideBySide>
+                <select
+                  className="select-role"
+                  name="role"
+                  id="role"
+                  onChange={(e) => {
+                    setGender(e.target.value);
+                  }}
+                >
+                  <option value="">Gender</option>
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                </select>
 
-          <SpanStyled className="register-form">
-            Back to Signin page?
-            <Link to="/signin" style={{ textDecoration: "none" }}>
-              here
-            </Link>
-          </SpanStyled>
-        </Form>
+                <select
+                  className="select-role"
+                  name="role"
+                  id="role"
+                  onChange={(e) => {
+                    setUser(e.target.value);
+                  }}
+                >
+                  <option value="">Choose a role</option>
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher</option>
+                </select>
+              </SideBySide>
+
+              <SideBySide>
+                <Input
+                  type="address"
+                  name="address"
+                  placeholder="Enter your address"
+                  value={address}
+                  onChange={(e) => {
+                    setAddress(e.target.value);
+                  }}
+                />
+              </SideBySide>
+
+              <SideBySide>
+                <Input
+                  type="text"
+                  placeholder="+1 (514) 500-5000"
+                  value={phoneNumber}
+                  maxLength="17"
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value);
+                  }}
+                />
+              </SideBySide>
+
+              <SideBySide>
+                <Input
+                  type="text"
+                  name="city"
+                  placeholder="Enter your City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+                <Input
+                  type="text"
+                  name="province"
+                  placeholder="Enter your province"
+                  onChange={(e) => {
+                    setLocation(e.target.value);
+                  }}
+                />
+              </SideBySide>
+              <SideBySide>
+                <Input
+                  type="text"
+                  name="country"
+                  placeholder="Enter your Country"
+                  onChange={(e) => {
+                    setCountry(e.target.value);
+                  }}
+                />
+                <Input
+                  type="text"
+                  name="zip code"
+                  placeholder="Enter your Zip/Postal code"
+                  maxLength="7"
+                  onChange={(e) => {
+                    setZip(e.target.value);
+                  }}
+                />
+              </SideBySide>
+
+              <SideBySide>
+                <div className="form-data">
+                  <label for="image"> Upload image </label>
+                  <input
+                    type="file"
+                    name="image"
+                    id="image"
+                    value={image}
+                    className="form-control-file"
+                    onChange={(e) => {
+                      setImage(e.target.value);
+                    }}
+                  />
+                </div>
+              </SideBySide>
+
+              <Subtitle className="section-signup">SignUp Information</Subtitle>
+              <SideBySide>
+                <Input
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
+                />
+              </SideBySide>
+
+              <SideBySide>
+                <Input
+                  type="password"
+                  name="password"
+                  placeholder="Enter your Password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                  }}
+                />
+              </SideBySide>
+            </Section>
+            <Button type="submit">Sign up</Button>
+
+            {wrongSubmission && (
+              <WrongRequest>
+                <div>{wrongSubmission}</div>
+              </WrongRequest>
+            )}
+
+            <SpanStyled className="register-form">
+              Back to Signin page?
+              <Link to="/signin" style={{ textDecoration: "none" }}>
+                here
+              </Link>
+            </SpanStyled>
+          </Form>
+        ) : (
+          <Confirmation firstname={firstName} lastname={lastName} />
+        )}
       </Wrapper>
     </>
   );
@@ -288,9 +409,7 @@ const Wrapper = styled.div`
   justify-content: center;
   background-size: cover;
   background-position: center;
-  height: 110vh;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  height: 120vh;
 
   .select-role {
     flex: 1;
@@ -317,6 +436,9 @@ const SideBySide = styled.div`
 
 const Section = styled.div`
   margin-bottom: 20px;
+  .section-signup {
+    margin-top: 35px;
+  }
 `;
 
 const Subtitle = styled.div`
@@ -360,7 +482,7 @@ const Form = styled.form`
   align-items: center;
   justify-content: center;
   width: 400px;
-  height: 170px;
+  height: 350px;
   background-color: #fff;
   border-radius: 10px;
   border: 1px solid transparent;
@@ -402,4 +524,40 @@ const WrongRequest = styled.div`
   font-weight: 500;
 `;
 
+const EachDepartment = styled.div`
+  .single-year {
+    padding: 5px;
+    list-style: none;
+  }
+`;
+// [class1, class2, class3]
+// {
+//   name:"abc",
+//   user:student,
+//   classes:[class1, class2, class3]
+// }
+
+// {
+//   name:"abc",
+//   user:teacher,
+//   classes:[class1, class2, class3]
+// }
+// [
+
+//   ({
+//     name: "abc",
+//     teacher: 1,
+//     class: class1,
+//   },
+//   {
+//     name: "abc",
+//     techer: 1,
+//     class: class2,
+//   },
+//   {
+//     name: "abc",
+//     teacher: 1,
+//     class: class3,
+//   })
+// ];
 export default Rgistration;
