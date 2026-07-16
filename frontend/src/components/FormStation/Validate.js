@@ -12,7 +12,6 @@ const Validate = ({
   location,
   country,
   zip,
-  password,
 }) => {
   let validationStatus = "good";
   if (firstName.length < 2) {
@@ -55,8 +54,8 @@ const Validate = ({
   }
 
   // INPUTS FOR CONTACT INFORMATION
-  // Phone number must be less then 18 characters.
-  if (phoneNumber.length > 10) {
+  // Phone number must be 10–17 characters (matches formatted input like +1 (514) 500-5000).
+  if (phoneNumber.length < 10 || phoneNumber.length > 17) {
     validationStatus = "Invalid phone number";
   }
   // Email must include an "@" and a ".".
@@ -66,12 +65,6 @@ const Validate = ({
 
   if (!email.includes("@") || !email.includes(".")) {
     validationStatus = 'Email must include an "@" and a "."';
-  }
-
-  if (!password) {
-    validationStatus = "Password is required";
-  } else if (password.length < 6) {
-    validationStatus = "Password needs to be 6 characters or more";
   }
 
   return validationStatus;

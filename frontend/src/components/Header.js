@@ -5,76 +5,110 @@ import { SchoolContext } from "./SchoolContext";
 
 const Header = () => {
   const { email, userSignedOutAction } = useContext(SchoolContext);
+
   return (
-    <>
-      <Wrapper>
-        <Link to="/" style={{ textDecoration: "none" }}>
-          <Logo>schoolPORTAL</Logo>
-        </Link>
+    <Wrapper>
+      <LogoLink to="/">
+        <Logo>schoolPORTAL</Logo>
+      </LogoLink>
 
-        <SigninStyle>
-          {email ? (
-            ` ${email} `
-          ) : (
-            <Link
-              to="/SignIn"
-              style={{ textDecoration: "none", color: "#fff", margin: "20px" }}
-            >
-              <span>Sign In</span>
-            </Link>
-          )}
-
-          <Button
-            onClick={() => {
-              userSignedOutAction();
-            }}
-          >
-            SignOut
-          </Button>
-        </SigninStyle>
-      </Wrapper>
-    </>
+      <NavActions>
+        {email ? (
+          <UserActions>
+            <UserEmail title={email}>{email}</UserEmail>
+            <SignOutButton type="button" onClick={userSignedOutAction}>
+              Sign out
+            </SignOutButton>
+          </UserActions>
+        ) : (
+          <SignInLink to="/signin">Sign in</SignInLink>
+        )}
+      </NavActions>
+    </Wrapper>
   );
 };
 
-const Wrapper = styled.div`
+const Wrapper = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #86bc42;
   height: 60px;
-  background-attachment: fixed;
+  padding: 0 32px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   @media (max-width: 600px) {
-    padding: 16px;
+    padding: 0 16px;
   }
 `;
 
-const Logo = styled.h1`
-  color: #fff;
-  margin-left: 45px;
-  font-size: 35px;
+const LogoLink = styled(Link)`
   text-decoration: none;
 `;
 
-const SigninStyle = styled.span`
+const Logo = styled.h1`
+  margin: 0;
   color: #fff;
-  margin-right: 45px;
-  padding: 5px;
-  font-size: 20px;
+  font-family: "Teko", sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 `;
 
-const Button = styled.button`
-  background-color: #86bc42;
+const NavActions = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const UserActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const UserEmail = styled.span`
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (max-width: 600px) {
+    max-width: 120px;
+    font-size: 13px;
+  }
+`;
+
+const SignOutButton = styled.button`
+  background: transparent;
   color: #fff;
   border-radius: 8px;
-  border: 1px solid #fff;
-  padding: 10px 20px;
-  margin-right: 10px;
-  font-size: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 
   &:hover {
-    cursor: pointer;
+    background: rgba(255, 255, 255, 0.15);
+  }
+`;
+
+const SignInLink = styled(Link)`
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
   }
 `;
 

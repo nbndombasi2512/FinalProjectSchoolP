@@ -1,20 +1,22 @@
 import React, { useState, useContext, useEffect } from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 import ValidateGrade from "./ValidateGrade";
 import { SchoolContext } from "../SchoolContext";
 import DisplayGrades from "../grades/DisplayGrades";
 import ProfileStudents from "./ProfileStudents";
+import CourseImage from "../CourseImage";
 
 const Profile = () => {
-  const { signedInUser } = useContext(SchoolContext);
+  const { signedInUser, profileLoaded, authFetch } = useContext(SchoolContext);
   // console.log(signedInUser, "signed in user");
 
   const [registration, setRegistration] = useState(null);
   const [allInOne, setAllInOne] = useState();
-  const [getStudent, setGetStudent] = useState("");
+  const [getStudent, setGetStudent] = useState([]);
   const [studentId, setStudentId] = useState("");
   const [studentClasses, setStudentClasses] = useState([]);
-  const [getStudentGrade, setGetStudentGrade] = useState();
+  const [getStudentGrade, setGetStudentGrade] = useState([]);
   // console.log("get student grade: ", getStudentGrade);
 
   const [grade, setGrade] = useState();
@@ -27,58 +29,58 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    const { email } = JSON.parse(localStorage.getItem("data")) || {};
-
-    if (!email) {
-      console.log("Email Missing");
-      return;
+    if (signedInUser?._id) {
+      setRegistration(signedInUser);
+    } else {
+      setRegistration(null);
     }
-    fetch(`/api/registration/${email}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setRegistration(data.data);
-      });
-  }, []);
+  }, [signedInUser]);
 
   useEffect(() => {
-    fetch("/api/registration?user=student")
+    if (!authFetch) return;
+
+    authFetch("/api/registration?user=student")
       .then((res) => res.json())
       .then((data) => {
-        setGetStudent(data.data);
+        setGetStudent(Array.isArray(data.data) ? data.data : []);
       });
-  }, []);
+  }, [authFetch]);
 
   useEffect(() => {
+    if (!signedInUser?._id) return;
+
     if (signedInUser.user === "teacher") {
       fetchGrade();
     } else if (signedInUser.user === "student") {
       fetchGradeStudent();
     }
-  }, []);
+  }, [signedInUser]);
 
   const fetchGrade = () => {
-    fetch(`/api/teacher/grade/${signedInUser._id}?user=teacher`)
+    authFetch(`/api/teacher/grade/${signedInUser._id}?user=teacher`)
       .then((res) => res.json())
       .then((data) => {
-        setGetStudentGrade(data.data);
+        setGetStudentGrade(Array.isArray(data.data) ? data.data : []);
       });
   };
 
   const fetchGradeStudent = () => {
-    fetch(`/api/teacher/grade/${signedInUser._id}?user=student`)
+    authFetch(`/api/teacher/grade/${signedInUser._id}?user=student`)
       .then((res) => res.json())
       .then((data) => {
-        setGetStudentGrade(data.data);
+        setGetStudentGrade(Array.isArray(data.data) ? data.data : []);
       });
   };
 
   useEffect(() => {
-    fetch("/api/grade").then((Response) =>
-      Response.json().then((data) => {
-        setAllInOne(data.data);
+    if (!authFetch) return;
+
+    authFetch("/api/grade").then((response) =>
+      response.json().then((data) => {
+        setAllInOne(Array.isArray(data.data) ? data.data : []);
       })
     );
-  }, []);
+  }, [authFetch]);
 
   const handleRegisteredGrade = (e) => {
     e.preventDefault();
@@ -97,8 +99,7 @@ const Profile = () => {
     }
 
     try {
-      //CREATE PURCHASE
-      fetch("/api/grade", {
+      authFetch("/api/grade", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,30 +128,43 @@ const Profile = () => {
     }
   };
 
-  const teacherStudents =
-    getStudent &&
-    getStudent?.filter((student) => {
-      for (let i = 0; i < student.selectedClasses.length; i++) {
-        if (signedInUser.selectedClasses.includes(student.selectedClasses[i])) {
-          return true;
-        }
-        return false;
-      }
-    });
+  const teacherStudents = (Array.isArray(getStudent) ? getStudent : []).filter(
+    (student) =>
+      student.selectedClasses?.some((cls) =>
+        signedInUser?.selectedClasses?.includes(cls)
+      )
+  );
 
   return (
     <>
+      {!profileLoaded ? (
+        <Wrapper className="row">
+          <EmptyState>Loading your profile...</EmptyState>
+        </Wrapper>
+      ) : !signedInUser?._id ? (
+        <Wrapper className="row">
+          <EmptyState>
+            <h2>Complete your school portal registration</h2>
+            <p>
+              Your Clerk account is active, but you still need to submit your
+              school profile.
+            </p>
+            <ProfileLink to="/registration">Go to registration</ProfileLink>
+          </EmptyState>
+        </Wrapper>
+      ) : (
       <Wrapper className="row">
         <Grid>
           <StyledH1>LIST OF MY COURSES</StyledH1>
           <Depart style={{ marginLeft: "20px" }}>
-            {registration &&
-              registration.selectedClasses.map((classes) => {
+            {registration?.selectedClasses?.map((classes) => {
                 return (
-                  <Department>
-                    {classes}
+                  <Department key={classes}>
+                    <CourseTop>
+                      <CourseImage courseName={classes} size="large" />
+                    </CourseTop>
 
-                    <div className="classes-section">
+                    <CourseBottom>
                       {signedInUser.user === "teacher" ? (
                         <>
                           <span className="full-name department">
@@ -173,7 +187,7 @@ const Profile = () => {
                           </span>
                         </>
                       )}
-                    </div>
+                    </CourseBottom>
                   </Department>
                 );
               })}
@@ -232,7 +246,10 @@ const Profile = () => {
                           {teacherStudents &&
                             teacherStudents.map((student) => {
                               return (
-                                <option value={student._id}>
+                                <option
+                                  key={student._id}
+                                  value={student._id}
+                                >
                                   {`${student.firstName} ${student.lastName}`}
                                 </option>
                               );
@@ -252,7 +269,11 @@ const Profile = () => {
                           </option>
                           {signedInUser &&
                             signedInUser?.selectedClasses?.map((classes) => {
-                              return <option value={classes}>{classes}</option>;
+                              return (
+                                <option key={classes} value={classes}>
+                                  {classes}
+                                </option>
+                              );
                             })}
                         </select>
                       </SideBySide>
@@ -296,7 +317,12 @@ const Profile = () => {
 
                       {getStudentGrade &&
                         getStudentGrade?.map((studentGrade) => {
-                          return <DisplayGrades grade={studentGrade} />;
+                          return (
+                            <DisplayGrades
+                              key={`${studentGrade.studentId}-${studentGrade.studentClasses}`}
+                              grade={studentGrade}
+                            />
+                          );
                         })}
                     </div>
                   </>
@@ -349,7 +375,12 @@ const Profile = () => {
 
                       {getStudentGrade &&
                         getStudentGrade?.map((studentGrade) => {
-                          return <DisplayGrades grade={studentGrade} />;
+                          return (
+                            <DisplayGrades
+                              key={`${studentGrade.studentId}-${studentGrade.studentClasses}`}
+                              grade={studentGrade}
+                            />
+                          );
                         })}
                     </div>
                   </>
@@ -380,8 +411,7 @@ const Profile = () => {
           </>
         )}
       </Wrapper>
-
-      {/* <ProfileStudents /> */}
+      )}
     </>
   );
 };
@@ -476,7 +506,7 @@ const Container = styled.div`
   flex-direction: column;
   position: relative;
   width: 800px;
-  height: 280px;
+  min-height: 280px;
   margin: 0 auto 0;
   word-break: break-all;
   /* border: 1px solid rgba(0, 0, 0, 0.274); */
@@ -492,7 +522,8 @@ const BlocTabs = styled.div`
 
 const Wrapper = styled.div`
   width: 100%;
-  height: 100vh;
+  min-height: auto;
+  padding-bottom: 40px;
 
   &.row {
     max-width: 1300px;
@@ -549,7 +580,7 @@ const Wrapper = styled.div`
     background: white;
     padding: 20px;
     width: 100%;
-    height: 100%;
+    min-height: auto;
     display: none;
   }
   .content h2 {
@@ -566,7 +597,6 @@ const Wrapper = styled.div`
   }
   .content p {
     width: 100%;
-    height: 100%;
   }
   .active-content {
     display: block;
@@ -595,40 +625,53 @@ const StyledH1 = styled.h1`
 
 const Depart = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
   margin: 30px;
 `;
 
 const Department = styled.div`
   display: flex;
   flex-direction: column;
-  width: 250px;
-  height: 280px;
-  background: linear-gradient(to top, #86bc42 50%, #fff 50%);
+  width: 220px;
+  min-height: 260px;
   border: 2px solid #86bc42;
   border-radius: 15px;
-  font-size: 25px;
-  color: #86bc42;
+  overflow: hidden;
   font-family: "Teko", sans-serif;
-  padding: 50px 20px 0 20px;
+`;
 
-  .classes-section {
-    margin-top: 130px;
-  }
+const CourseTop = styled.div`
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 14px 16px;
+  background: #fff;
+`;
+
+const CourseBottom = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 14px;
+  background: #86bc42;
+  min-height: 110px;
 
   .full-name {
-    display: flex;
-    flex-direction: column;
-    font-size: 14px;
-    /* margin-top: 85px; */
+    display: block;
+    font-size: 13px;
+    line-height: 1.3;
     color: #fff;
+    word-break: break-word;
   }
 
   .department {
-    font-size: 16px;
-    margin-top: -40px;
-    margin-bottom: 15px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
   }
 `;
 
@@ -638,6 +681,38 @@ const WrongRequest = styled.div`
   margin: 15px 0 15px 0;
   font-family: "Teko", sans-serif;
   font-weight: 500;
+`;
+
+const EmptyState = styled.div`
+  max-width: 640px;
+  margin: 80px auto;
+  padding: 32px;
+  text-align: center;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  h2 {
+    margin-bottom: 12px;
+    color: #333;
+  }
+
+  p {
+    margin-bottom: 20px;
+    color: #666;
+    line-height: 1.5;
+  }
+`;
+
+const ProfileLink = styled(Link)`
+  display: inline-block;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: #86bc42;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
 `;
 
 export default Profile;

@@ -7,12 +7,21 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Profile from "./components/profileStation/Profile";
 import SignIn from "./components/FormStation/SignIn";
+import SignUp from "./components/FormStation/SignUp";
 import Registration from "./components/FormStation/Registration";
 import Sidebar from "./components/Sidebar";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+const PageWithSidebar = ({ children }) => (
+  <PageLayout>
+    <Sidebar />
+    <PageContent>{children}</PageContent>
+  </PageLayout>
+);
 
 const App = () => {
   return (
-    <>
+    <AppShell>
       <GlobalStyles />
       <Header />
       <Main>
@@ -23,36 +32,45 @@ const App = () => {
           <Route exact path="/signin">
             <SignIn />
           </Route>
-
-          <Route exact path="/registration">
-            <Registration />
+          <Route exact path="/sign-up">
+            <SignUp />
           </Route>
-
-          {/* Wrapper for the profile component only */}
-          <Wrapper>
-            <Sidebar />
-            <Switch>
-              <Route exact path="/profile">
-                <Profile />
-              </Route>
-            </Switch>
-          </Wrapper>
+          <ProtectedRoute exact path="/registration">
+            <Registration />
+          </ProtectedRoute>
+          <ProtectedRoute path="/profile">
+            <PageWithSidebar>
+              <Profile />
+            </PageWithSidebar>
+          </ProtectedRoute>
         </Switch>
       </Main>
       <Footer />
-    </>
+    </AppShell>
   );
 };
 
-const Wrapper = styled.div`
+const AppShell = styled.div`
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
+`;
+
+const PageLayout = styled.div`
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+`;
+
+const PageContent = styled.div`
+  flex: 1;
+  min-width: 0;
 `;
 
 const Main = styled.main`
   width: 100%;
-  flex-grow: 1;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 `;
 export default App;

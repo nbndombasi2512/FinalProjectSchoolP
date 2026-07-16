@@ -5,443 +5,671 @@ import Validate from "./Validate";
 import { SchoolContext } from "../SchoolContext";
 import CheckboxComponent from "../CheckboxComponent";
 
-const Confirmation = ({ firstname, lastname, selectedClasses }) => (
-  <div className="confirmation-style">
-    {firstname} {lastname} your registration was successful
-  </div>
+const YEAR_OPTIONS = [
+  { value: "firstYear", label: "First year" },
+  { value: "secondYear", label: "Second year" },
+  { value: "thirdYear", label: "Third year" },
+];
+
+const MAX_CLASSES = 4;
+
+const Confirmation = ({ firstName, lastName, selectedClasses }) => (
+  <SuccessCard>
+    <SuccessTitle>Registration successful</SuccessTitle>
+    <SuccessMessage>
+      {firstName} {lastName}, your account has been created.
+    </SuccessMessage>
+    {selectedClasses.length > 0 && (
+      <CourseSummary>
+        <span>Selected courses:</span>
+        <ul>
+          {selectedClasses.map((course) => (
+            <li key={course}>{course}</li>
+          ))}
+        </ul>
+      </CourseSummary>
+    )}
+    <SignInLink to="/profile">Go to your profile</SignInLink>
+  </SuccessCard>
 );
 
-const Rgistration = () => {
-  const { faculties } = useContext(SchoolContext);
+const Registration = () => {
+  const { faculties, email, authFetch, refreshUserProfile } =
+    useContext(SchoolContext);
   const [selectedClasses, setSelectedClasses] = useState([]);
-
-  const [image, setImage] = useState("");
-  const [registered, setRegistered] = useState(false);
-
   const [courses, setCourses] = useState({});
-  const [department, setDepartment] = useState("");
-  const [year, setYear] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [gender, setGender] = useState("");
-  const [address, setAddress] = useState("");
-  const [user, setUser] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [city, setCity] = useState("");
-  const [location, setLocation] = useState(""); // used for provience/state or territory.
-  const [country, setCountry] = useState("");
-  const [zip, setZip] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [registered, setRegistered] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [wrongSubmission, setWrongSubmission] = useState(null);
+  const [classLimitError, setClassLimitError] = useState(null);
+
+  const [form, setForm] = useState({
+    department: "",
+    year: "",
+    firstName: "",
+    lastName: "",
+    gender: "",
+    address: "",
+    user: "",
+    phoneNumber: "",
+    city: "",
+    location: "",
+    country: "",
+    zip: "",
+    email: "",
+  });
 
   useEffect(() => {
-    if (department && year) {
-      const faculty = faculties?.filter((fact) => {
-        return fact.faculty === department;
-      });
-
-      const courses = faculty[0].courses.filter(
-        (course) => course.year === year
-      );
-      setCourses(courses[0]);
+    if (email) {
+      setForm((prev) => ({ ...prev, email }));
     }
-  }, [department, year, faculties]);
+  }, [email]);
 
-  // This state is for handling error input submission
-  const [wrongSubmission, setWrongSubmission] = useState(null);
-
-  const idGenerateStudentStaff = (year, user) => {
-    let val = Math.floor(1000 + Math.random() * 9000);
-    if (user === "teacher") {
-      return "2015" + val;
-    }
-
-    if (year === "firstYear") {
-      return "2021" + val;
-    } else if (year === "secondYear") {
-      return "2020" + val;
-    } else if (year === "thirdYear") {
-      return "2019" + val;
-    }
+  const updateField = (field) => (e) => {
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+    setWrongSubmission(null);
   };
 
-  const handleRegistrationInfo = (e) => {
+  const departmentOptions =
+    faculties?.map((fact) => fact.faculty) || [
+      "Science",
+      "Administration",
+      "Education",
+    ];
+
+  useEffect(() => {
+    setSelectedClasses([]);
+    setClassLimitError(null);
+
+    if (!form.department || !form.year || !faculties?.length) {
+      setCourses({});
+      return;
+    }
+
+    const matchedFaculty = faculties.find(
+      (fact) => fact.faculty === form.department
+    );
+
+    if (!matchedFaculty?.courses) {
+      setCourses({});
+      return;
+    }
+
+    const matchedCourses = matchedFaculty.courses.find(
+      (course) => course.year === form.year
+    );
+    setCourses(matchedCourses || {});
+  }, [form.department, form.year, faculties]);
+
+  const idGenerateStudentStaff = (year, role) => {
+    const val = Math.floor(1000 + Math.random() * 9000);
+
+    if (role === "teacher") {
+      return `2015${val}`;
+    }
+
+    if (year === "firstYear") return `2021${val}`;
+    if (year === "secondYear") return `2020${val}`;
+    if (year === "thirdYear") return `2019${val}`;
+    return `2021${val}`;
+  };
+
+  const handleClassChange = (ev) => {
+    const selectedCourse = ev.target.value;
+    setClassLimitError(null);
+
+    if (!ev.target.checked) {
+      setSelectedClasses((curr) => curr.filter((e) => e !== selectedCourse));
+      return;
+    }
+
+    if (selectedClasses.length >= MAX_CLASSES) {
+      setClassLimitError(`You can select up to ${MAX_CLASSES} courses.`);
+      return;
+    }
+
+    setSelectedClasses((curr) =>
+      Array.from(new Set([...curr, selectedCourse]))
+    );
+  };
+
+  const handleRegistrationInfo = async (e) => {
     e.preventDefault();
+    setWrongSubmission(null);
+    setClassLimitError(null);
+
+    if (!form.department) {
+      setWrongSubmission("Please select a department.");
+      return;
+    }
+
+    if (!form.year) {
+      setWrongSubmission("Please select your year.");
+      return;
+    }
+
+    if (form.user === "student" && selectedClasses.length === 0) {
+      setWrongSubmission("Please select at least one course.");
+      return;
+    }
 
     const validationStatus = Validate({
-      department,
+      department: form.department,
       courses,
-      year,
-      firstName,
-      lastName,
-      gender,
-      email,
-      address,
-      user,
-      phoneNumber,
-      city,
-      location,
-      country,
-      zip,
-      image,
-      password,
+      studentStaff: form.year,
+      firstName: form.firstName,
+      lastName: form.lastName,
+      gender: form.gender,
+      email: form.email,
+      address: form.address,
+      user: form.user,
+      phoneNumber: form.phoneNumber,
+      city: form.city,
+      location: form.location,
+      country: form.country,
+      zip: form.zip,
+      image: "",
     });
 
     if (validationStatus !== "good") {
       setWrongSubmission(validationStatus);
       return;
-    } else {
-      setWrongSubmission(null);
     }
 
+    setIsSubmitting(true);
+
     try {
-      //CREATE PURCHASE
-      fetch("/api/registration", {
+      const response = await authFetch("/api/registration", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          _id: idGenerateStudentStaff(year, user),
-          department: department,
-          // courses,
-          year: year,
-          firstName: firstName,
-          lastName: lastName,
-          selectedClasses: selectedClasses,
-          gender: gender,
-          email: email,
-          address: address,
-          user: user,
-          phoneNumber: phoneNumber,
-          city: city,
-          location: location,
-          country: country,
-          zip: zip,
-          image: image,
-          password: password,
+          _id: idGenerateStudentStaff(form.year, form.user),
+          department: form.department,
+          year: form.year,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          selectedClasses,
+          gender: form.gender,
+          email: form.email,
+          address: form.address,
+          user: form.user,
+          phoneNumber: form.phoneNumber,
+          city: form.city,
+          location: form.location,
+          country: form.country,
+          zip: form.zip,
+          image: "",
         }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.status === 200) {
-            setRegistered(!registered);
-          }
-          if (data.status === 400) {
-            console.log("ERROR:", data.error);
-            setWrongSubmission(data.error);
-          }
-        });
+      });
+
+      const data = await response.json();
+
+      if (data.status === 200) {
+        refreshUserProfile();
+        setRegistered(true);
+        return;
+      }
+
+      if (data.status === 400) {
+        setWrongSubmission(data.error);
+        return;
+      }
+
+      setWrongSubmission(data.error || "Registration failed. Please try again.");
     } catch (error) {
       console.error("ERROR:", error);
-      setWrongSubmission("Sorry we are having server issues at the moment");
+      setWrongSubmission("Sorry, we are having server issues at the moment.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <>
-      <Wrapper>
-        {!registered ? (
-          <Form onSubmit={handleRegistrationInfo}>
-            <Section>
-              <Subtitle>Register Information</Subtitle>
+    <Wrapper>
+      {!registered ? (
+        <Form onSubmit={handleRegistrationInfo}>
+          <FormHeader>
+            <Title>Create your account</Title>
+            <FormHint>Fill in your details to register for the school portal.</FormHint>
+          </FormHeader>
 
-              <SideBySide>
-                <select
-                  className="select-role"
-                  name="role"
-                  id="role"
-                  onChange={(e) => {
-                    setDepartment(e.target.value);
-                  }}
-                >
-                  <option value="" hidden>
-                    department
+          <Section>
+            <Subtitle>Academic information</Subtitle>
+
+            <FieldGroup>
+              <Label htmlFor="department">Department</Label>
+              <Select
+                id="department"
+                name="department"
+                value={form.department}
+                onChange={updateField("department")}
+              >
+                <option value="" hidden>
+                  Select department
+                </option>
+                {departmentOptions.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
                   </option>
-                  <option value="Science">Science</option>
-                  <option value="Administration">Administration</option>
-                  <option value="Education">Education</option>
-                </select>
+                ))}
+              </Select>
+            </FieldGroup>
 
-                <select
-                  className="select-role"
-                  name="role"
-                  id="role"
-                  onChange={(e) => {
-                    setYear(e.target.value);
-                  }}
-                >
-                  <option value="" hidden>
-                    Select your year
+            <FieldGroup>
+              <Label htmlFor="year">Year</Label>
+              <Select
+                id="year"
+                name="year"
+                value={form.year}
+                onChange={updateField("year")}
+              >
+                <option value="" hidden>
+                  Select your year
+                </option>
+                {YEAR_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
                   </option>
-                  <option value="firstYear">firstYear</option>
-                  <option value="secondYear">secondYear</option>
-                  <option value="thirdYear">thirdYear</option>
-                </select>
-              </SideBySide>
+                ))}
+              </Select>
+            </FieldGroup>
 
-              <SideBySide style={{ flexDirection: "column" }}>
-                {courses?.classes?.map((course) => {
-                  return (
-                    <EachDepartment>
-                      <li className="single-year">
+            {form.user !== "teacher" && (
+              <CourseSection>
+                <CourseHeader>
+                  <Label>Courses</Label>
+                  <CourseCount>
+                    {selectedClasses.length}/{MAX_CLASSES} selected
+                  </CourseCount>
+                </CourseHeader>
+
+                {!form.department || !form.year ? (
+                  <CourseHint>
+                    Select a department and year to view available courses.
+                  </CourseHint>
+                ) : courses?.classes?.length ? (
+                  <CourseGrid>
+                    {courses.classes.map((course) => (
+                      <CourseOption key={course}>
                         <CheckboxComponent
                           name={course}
-                          checked={selectedClasses.some((e) => course === e)}
-                          handleOnChange={(ev) => {
-                            const selectedCourse = ev.target.value;
-
-                            // NOTE: `!ev.target.checked` is the condition when the user clicked an unchecked checkbox
-                            if (!ev.target.checked) {
-                              setSelectedClasses((curr) =>
-                                curr.filter((e) => e !== selectedCourse)
-                              );
-                              return;
-                            }
-
-                            if (selectedClasses.length >= 4) {
-                              window.alert("Out of limit number classes");
-                              return;
-                            }
-
-                            const newClasses = Array.from(
-                              new Set([...selectedClasses, selectedCourse])
-                            );
-
-                            setSelectedClasses(newClasses);
-                          }}
+                          checked={selectedClasses.includes(course)}
+                          handleOnChange={handleClassChange}
                         />
-                      </li>
-                    </EachDepartment>
-                  );
-                })}
-              </SideBySide>
+                      </CourseOption>
+                    ))}
+                  </CourseGrid>
+                ) : (
+                  <CourseHint>No courses available for this selection.</CourseHint>
+                )}
 
-              <SideBySide>
+                {classLimitError && (
+                  <InlineError>{classLimitError}</InlineError>
+                )}
+              </CourseSection>
+            )}
+
+            <FieldRow>
+              <FieldGroup>
+                <Label htmlFor="firstName">First name</Label>
                 <Input
+                  id="firstName"
                   type="text"
-                  name="firstname"
-                  placeholder="Enter your Firstname"
-                  value={firstName}
-                  onChange={(e) => {
-                    setFirstName(e.target.value);
-                  }}
+                  name="firstName"
+                  placeholder="First name"
+                  value={form.firstName}
+                  onChange={updateField("firstName")}
                 />
+              </FieldGroup>
 
+              <FieldGroup>
+                <Label htmlFor="lastName">Last name</Label>
                 <Input
+                  id="lastName"
                   type="text"
-                  name="lastname"
-                  placeholder="Enter your Lastname"
-                  value={lastName}
-                  onChange={(e) => {
-                    setLastName(e.target.value);
-                  }}
+                  name="lastName"
+                  placeholder="Last name"
+                  value={form.lastName}
+                  onChange={updateField("lastName")}
                 />
-              </SideBySide>
+              </FieldGroup>
+            </FieldRow>
 
-              <SideBySide>
-                <select
-                  className="select-role"
-                  name="role"
-                  id="role"
-                  onChange={(e) => {
-                    setGender(e.target.value);
-                  }}
+            <FieldRow>
+              <FieldGroup>
+                <Label htmlFor="gender">Gender</Label>
+                <Select
+                  id="gender"
+                  name="gender"
+                  value={form.gender}
+                  onChange={updateField("gender")}
                 >
-                  <option value="">Gender</option>
+                  <option value="">Select gender</option>
                   <option value="female">Female</option>
                   <option value="male">Male</option>
-                </select>
+                </Select>
+              </FieldGroup>
 
-                <select
-                  className="select-role"
-                  name="role"
-                  id="role"
-                  onChange={(e) => {
-                    setUser(e.target.value);
-                  }}
+              <FieldGroup>
+                <Label htmlFor="user">Role</Label>
+                <Select
+                  id="user"
+                  name="user"
+                  value={form.user}
+                  onChange={updateField("user")}
                 >
                   <option value="">Choose a role</option>
                   <option value="student">Student</option>
                   <option value="teacher">Teacher</option>
-                </select>
-              </SideBySide>
+                </Select>
+              </FieldGroup>
+            </FieldRow>
+          </Section>
 
-              <SideBySide>
-                <Input
-                  type="address"
-                  name="address"
-                  placeholder="Enter your address"
-                  value={address}
-                  onChange={(e) => {
-                    setAddress(e.target.value);
-                  }}
-                />
-              </SideBySide>
+          <Section>
+            <Subtitle>Contact information</Subtitle>
 
-              <SideBySide>
-                <Input
-                  type="text"
-                  placeholder="+1 (514) 500-5000"
-                  value={phoneNumber}
-                  maxLength="17"
-                  onChange={(e) => {
-                    setPhoneNumber(e.target.value);
-                  }}
-                />
-              </SideBySide>
+            <FieldGroup>
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                type="text"
+                name="address"
+                placeholder="Street address"
+                value={form.address}
+                onChange={updateField("address")}
+              />
+            </FieldGroup>
 
-              <SideBySide>
+            <FieldGroup>
+              <Label htmlFor="phoneNumber">Phone number</Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                name="phoneNumber"
+                placeholder="+1 (514) 500-5000"
+                value={form.phoneNumber}
+                maxLength="17"
+                onChange={updateField("phoneNumber")}
+              />
+            </FieldGroup>
+
+            <FieldRow>
+              <FieldGroup>
+                <Label htmlFor="city">City</Label>
                 <Input
+                  id="city"
                   type="text"
                   name="city"
-                  placeholder="Enter your City"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="City"
+                  value={form.city}
+                  onChange={updateField("city")}
                 />
+              </FieldGroup>
+
+              <FieldGroup>
+                <Label htmlFor="location">Province</Label>
                 <Input
+                  id="location"
                   type="text"
-                  name="province"
-                  placeholder="Enter your province"
-                  onChange={(e) => {
-                    setLocation(e.target.value);
-                  }}
+                  name="location"
+                  placeholder="Province / State"
+                  value={form.location}
+                  onChange={updateField("location")}
                 />
-              </SideBySide>
-              <SideBySide>
+              </FieldGroup>
+            </FieldRow>
+
+            <FieldRow>
+              <FieldGroup>
+                <Label htmlFor="country">Country</Label>
                 <Input
+                  id="country"
                   type="text"
                   name="country"
-                  placeholder="Enter your Country"
-                  onChange={(e) => {
-                    setCountry(e.target.value);
-                  }}
+                  placeholder="Country"
+                  value={form.country}
+                  onChange={updateField("country")}
                 />
+              </FieldGroup>
+
+              <FieldGroup>
+                <Label htmlFor="zip">Postal code</Label>
                 <Input
+                  id="zip"
                   type="text"
-                  name="zip code"
-                  placeholder="Enter your Zip/Postal code"
-                  maxLength="7"
-                  onChange={(e) => {
-                    setZip(e.target.value);
-                  }}
+                  name="zip"
+                  placeholder="Postal code"
+                  maxLength="10"
+                  value={form.zip}
+                  onChange={updateField("zip")}
                 />
-              </SideBySide>
+              </FieldGroup>
+            </FieldRow>
+          </Section>
 
-              {/* <SideBySide>
-                <div className="form-data">
-                  <label for="image"> Upload image </label>
-                  <input
-                    type="file"
-                    name="image"
-                    id="image"
-                    value={image}
-                    className="form-control-file"
-                    onChange={(e) => {
-                      setImage(e.target.value);
-                    }}
-                  />
-                </div>
-              </SideBySide> */}
+          <Section>
+            <Subtitle>Account</Subtitle>
 
-              <Subtitle className="section-signup">SignUp Information</Subtitle>
-              <SideBySide>
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                  }}
-                />
-              </SideBySide>
+            <FieldGroup>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                value={form.email}
+                readOnly
+                disabled
+              />
+              <AccountHint>
+                This email comes from your Clerk account and cannot be changed here.
+              </AccountHint>
+            </FieldGroup>
+          </Section>
 
-              <SideBySide>
-                <Input
-                  type="password"
-                  name="password"
-                  placeholder="Enter your Password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                  }}
-                />
-              </SideBySide>
-            </Section>
-            <Button type="submit">Sign up</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Signing up..." : "Sign up"}
+          </Button>
 
-            {wrongSubmission && (
-              <WrongRequest>
-                <div>{wrongSubmission}</div>
-              </WrongRequest>
-            )}
+          {wrongSubmission && <WrongRequest>{wrongSubmission}</WrongRequest>}
 
-            <SpanStyled className="register-form">
-              Back to Signin page?
-              <Link to="/signin" style={{ textDecoration: "none" }}>
-                here
-              </Link>
-            </SpanStyled>
-          </Form>
-        ) : (
-          <Confirmation firstname={firstName} lastname={lastName} />
-        )}
-      </Wrapper>
-    </>
+          <SpanStyled>
+            Already signed in with Clerk?{" "}
+            <Link to="/profile">Go to your profile</Link>
+          </SpanStyled>
+        </Form>
+      ) : (
+        <Confirmation
+          firstName={form.firstName}
+          lastName={form.lastName}
+          selectedClasses={selectedClasses}
+        />
+      )}
+    </Wrapper>
   );
 };
 
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
-  background-size: cover;
-  background-position: center;
-  height: 120vh;
+  padding: 40px 20px 80px;
+`;
 
-  .confirmation-style {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 25px;
-  }
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 640px;
+  background-color: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 32px 36px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+`;
 
-  .select-role {
-    flex: 1;
-    width: 100%;
-    height: 42px;
-    letter-spacing: 1px;
-    background-color: transparent;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    padding: 0 16px;
-    margin-right: 8px;
-    color: #808080;
+const FormHeader = styled.div`
+  margin-bottom: 28px;
+`;
+
+const Title = styled.h2`
+  margin: 0 0 8px;
+  color: #333;
+  font-family: "Teko", sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+`;
+
+const FormHint = styled.p`
+  margin: 0;
+  color: #777;
+  font-size: 14px;
+  line-height: 1.5;
+`;
+
+const Section = styled.div`
+  margin-bottom: 28px;
+`;
+
+const Subtitle = styled.h3`
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 0 0 18px;
+  color: #86bc42;
+  font-family: "Teko", sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+`;
+
+const FieldRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 `;
 
-const SideBySide = styled.div`
+const FieldGroup = styled.div`
   display: flex;
-  margin-bottom: 16px;
+  flex-direction: column;
+  margin-bottom: 18px;
+  min-width: 0;
+  width: 100%;
 
-  @media (max-width: 600px) {
-    flex-direction: column;
+  ${FieldRow} & {
     margin-bottom: 0;
   }
 `;
 
-const Section = styled.div`
-  margin-bottom: 20px;
-  .section-signup {
-    margin-top: 35px;
+const Label = styled.label`
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+  line-height: 1.2;
+`;
+
+const inputStyles = `
+  width: 100%;
+  height: 44px;
+  box-sizing: border-box;
+  letter-spacing: 0.2px;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  border-radius: 8px;
+  padding: 0 14px;
+  color: #222;
+  font-size: 15px;
+  font-family: inherit;
+
+  &::placeholder {
+    color: #999;
+    font-size: 14px;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #86bc42;
+    box-shadow: 0 0 0 3px rgba(134, 188, 66, 0.12);
   }
 `;
 
-const Subtitle = styled.div`
-  text-transform: uppercase;
-  font-weight: 600;
+const Input = styled.input`
+  ${inputStyles}
+`;
+
+const Select = styled.select`
+  ${inputStyles}
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+  color: ${(props) => (props.value ? "#222" : "#999")};
+`;
+
+const CourseSection = styled.div`
+  margin-bottom: 8px;
+`;
+
+const CourseHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
+`;
+
+const CourseCount = styled.span`
+  font-size: 12px;
   color: #86bc42;
-  font-family: "Teko", sans-serif;
+  font-weight: 600;
+`;
+
+const CourseHint = styled.p`
+  margin: 0;
+  padding: 12px;
+  background: #f7f7f7;
+  border-radius: 6px;
+  color: #777;
+  font-size: 13px;
+`;
+
+const AccountHint = styled.p`
+  margin: 8px 0 0;
+  color: #777;
+  font-size: 13px;
+  line-height: 1.4;
+`;
+
+const CourseGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+`;
+
+const CourseOption = styled.div`
+  padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  background: #fafafa;
+
+  .course-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .course-checkbox label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    flex: 1;
+  }
 `;
 
 const Button = styled.button`
@@ -449,81 +677,122 @@ const Button = styled.button`
   justify-content: center;
   align-items: center;
   background-color: #86bc42;
-  width: 300px;
-  height: 40px;
-  margin-top: 10px;
-  margin-bottom: 20px;
+  width: 100%;
+  height: 44px;
+  margin-top: 8px;
   border-radius: 8px;
   border: transparent;
-  font-size: 18px;
-  padding: 15px;
+  font-size: 16px;
+  font-weight: 600;
   color: #fff;
+  transition: background-color 0.2s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     cursor: pointer;
     background-color: #628a30;
-    color: #fff;
-    transition: transform 0.4s, opacity 0.5s ease-in-out;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 `;
 
-const SpanStyled = styled.span`
-  color: #bbb;
-`;
+const SpanStyled = styled.p`
+  margin: 20px 0 0;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
 
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 400px;
-  height: 350px;
-  background-color: #fff;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  margin-top: 350px;
-
-  .login-span {
+  a {
     color: #86bc42;
-    margin-bottom: 30px;
-  }
-`;
+    text-decoration: none;
+    font-weight: 600;
 
-const Input = styled.input`
-  flex: 1;
-  width: 100%;
-  height: 42px;
-  letter-spacing: 1px;
-  background-color: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  padding: 0 16px;
-  margin-right: 8px;
-
-  &:last-child {
-    margin-right: 15;
-  }
-
-  @media (max-width: 600px) {
-    flex: auto;
-    width: 100%;
-    margin-right: 0;
-    margin-bottom: 8px;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;
 
 const WrongRequest = styled.div`
-  color: red;
+  color: #c0392b;
   text-align: center;
-  margin: 15px 0 15px 0;
-  font-family: "Teko", sans-serif;
-  font-weight: 500;
+  margin-top: 16px;
+  padding: 10px 12px;
+  background: #fdecea;
+  border-radius: 6px;
+  font-size: 14px;
 `;
 
-const EachDepartment = styled.div`
-  .single-year {
-    padding: 5px;
-    list-style: none;
+const InlineError = styled.p`
+  margin: 8px 0 0;
+  color: #c0392b;
+  font-size: 13px;
+`;
+
+const SuccessCard = styled.div`
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 32px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(134, 188, 66, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  text-align: center;
+`;
+
+const SuccessTitle = styled.h2`
+  margin: 0 0 12px;
+  color: #86bc42;
+  font-family: "Teko", sans-serif;
+  font-size: 32px;
+`;
+
+const SuccessMessage = styled.p`
+  margin: 0 0 20px;
+  color: #444;
+  font-size: 16px;
+  line-height: 1.5;
+`;
+
+const CourseSummary = styled.div`
+  margin-bottom: 24px;
+  text-align: left;
+  background: #f7f7f7;
+  border-radius: 8px;
+  padding: 16px;
+
+  span {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #555;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 18px;
+    color: #666;
+  }
+
+  li {
+    margin-bottom: 4px;
   }
 `;
 
-export default Rgistration;
+const SignInLink = styled(Link)`
+  display: inline-block;
+  padding: 12px 24px;
+  background: #86bc42;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+
+  &:hover {
+    background: #628a30;
+  }
+`;
+
+export default Registration;

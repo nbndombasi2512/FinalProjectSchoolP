@@ -40,6 +40,11 @@ export default createGlobalStyle`
     }
     body {
         line-height: 1;
+        overflow-x: hidden;
+    }
+
+    #root {
+        min-height: 100vh;
     }
     ol, ul {
         list-style: none;
