@@ -4,22 +4,21 @@ import { BrowserRouter } from "react-router-dom";
 import { ClerkProvider } from "@clerk/clerk-react";
 import App from "./App";
 import { SchoolContextProvider } from "./components/SchoolContext";
+import ClerkSetup, { isClerkKeyConfigured } from "./components/ClerkSetup";
 
 const clerkPublishableKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
 
-if (!clerkPublishableKey) {
-  console.warn(
-    "Missing REACT_APP_CLERK_PUBLISHABLE_KEY. Add it to frontend/.env"
-  );
-}
-
 ReactDOM.render(
-  <ClerkProvider publishableKey={clerkPublishableKey || ""}>
-    <BrowserRouter>
-      <SchoolContextProvider>
-        <App />
-      </SchoolContextProvider>
-    </BrowserRouter>
-  </ClerkProvider>,
+  isClerkKeyConfigured(clerkPublishableKey) ? (
+    <ClerkProvider publishableKey={clerkPublishableKey}>
+      <BrowserRouter>
+        <SchoolContextProvider>
+          <App />
+        </SchoolContextProvider>
+      </BrowserRouter>
+    </ClerkProvider>
+  ) : (
+    <ClerkSetup />
+  ),
   document.getElementById("root")
 );

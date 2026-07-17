@@ -15,18 +15,19 @@ const {
   ensureOwnRegistrationId,
 } = require("./HandlerFolder/Handlers");
 const {
-  clerkMiddleware,
-  requireAuth,
+  clerkMiddlewareOrNoop,
+  requireAuthOrUnavailable,
   requireAuthenticatedEmail,
   requireMatchingEmailParam,
+  isClerkConfigured,
 } = require("./middleware/auth");
 
 const PORT = 8000;
 const { connectDb } = require("./db");
 
-if (!process.env.CLERK_SECRET_KEY) {
+if (!isClerkConfigured()) {
   console.warn(
-    "Warning: CLERK_SECRET_KEY is missing from backend/.env. Protected API routes will fail."
+    "Warning: Clerk keys are missing or still placeholders in backend/.env. Protected API routes will return 503 until both CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY are set."
   );
 }
 
@@ -36,29 +37,34 @@ express()
   .use(bodyParser.json())
   .use(express.urlencoded({ extended: false }))
   .use("/", express.static(__dirname + "/"))
-  .use(clerkMiddleware())
+  .use(clerkMiddlewareOrNoop())
 
   .get("/api/faculty", getAllFaculties)
 
-  .post("/api/registration", requireAuth(), requireAuthenticatedEmail, addRegistration)
+  .post(
+    "/api/registration",
+    requireAuthOrUnavailable(),
+    requireAuthenticatedEmail,
+    addRegistration
+  )
   .get(
     "/api/registration/:email",
-    requireAuth(),
+    requireAuthOrUnavailable(),
     requireMatchingEmailParam,
     getStudentByEmail
   )
   .get(
     "/api/registration",
-    requireAuth(),
+    requireAuthOrUnavailable(),
     requireAuthenticatedEmail,
     getAllRegisteredStudent
   )
 
-  .post("/api/grade", requireAuth(), requireAuthenticatedEmail, addGrade)
-  .get("/api/grade", requireAuth(), requireAuthenticatedEmail, getGradeByClasse)
+  .post("/api/grade", requireAuthOrUnavailable(), requireAuthenticatedEmail, addGrade)
+  .get("/api/grade", requireAuthOrUnavailable(), requireAuthenticatedEmail, getGradeByClasse)
   .get(
     "/api/teacher/grade/:id",
-    requireAuth(),
+    requireAuthOrUnavailable(),
     requireAuthenticatedEmail,
     ensureOwnRegistrationId,
     getAllStudentGrade

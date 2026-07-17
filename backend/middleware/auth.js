@@ -2,6 +2,36 @@
 
 const { clerkMiddleware, requireAuth, getAuth, clerkClient } = require("@clerk/express");
 
+const isClerkConfigured = () => {
+  const secretKey = process.env.CLERK_SECRET_KEY;
+  const publishableKey = process.env.CLERK_PUBLISHABLE_KEY;
+
+  return (
+    secretKey &&
+    publishableKey &&
+    !secretKey.includes("REPLACE_WITH") &&
+    !publishableKey.includes("REPLACE_WITH")
+  );
+};
+
+const noopMiddleware = (_req, _res, next) => next();
+
+const clerkMiddlewareOrNoop = () =>
+  isClerkConfigured() ? clerkMiddleware() : noopMiddleware;
+
+const requireAuthOrUnavailable = () => {
+  if (!isClerkConfigured()) {
+    return (_req, res) =>
+      res.status(503).json({
+        status: 503,
+        error:
+          "Clerk is not configured on the server. Add CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY to backend/.env.",
+      });
+  }
+
+  return requireAuth();
+};
+
 const getAuthenticatedEmail = async (req) => {
   const { userId } = getAuth(req);
 
@@ -18,6 +48,14 @@ const getAuthenticatedEmail = async (req) => {
 };
 
 const requireAuthenticatedEmail = async (req, res, next) => {
+  if (!isClerkConfigured()) {
+    return res.status(503).json({
+      status: 503,
+      error:
+        "Clerk is not configured on the server. Add CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY to backend/.env.",
+    });
+  }
+
   try {
     const email = await getAuthenticatedEmail(req);
 
@@ -34,6 +72,14 @@ const requireAuthenticatedEmail = async (req, res, next) => {
 };
 
 const requireMatchingEmailParam = async (req, res, next) => {
+  if (!isClerkConfigured()) {
+    return res.status(503).json({
+      status: 503,
+      error:
+        "Clerk is not configured on the server. Add CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY to backend/.env.",
+    });
+  }
+
   try {
     const email = await getAuthenticatedEmail(req);
     const requestedEmail = decodeURIComponent(req.params.email || "");
@@ -55,8 +101,9 @@ const requireMatchingEmailParam = async (req, res, next) => {
 };
 
 module.exports = {
-  clerkMiddleware,
-  requireAuth,
+  isClerkConfigured,
+  clerkMiddlewareOrNoop,
+  requireAuthOrUnavailable,
   getAuth,
   getAuthenticatedEmail,
   requireAuthenticatedEmail,
